@@ -13,6 +13,9 @@ github_username:  zalex80
 
 markdown: kramdown
 
+kramdown:
+  input: GFM
+
 defaults:
   -
     scope:
