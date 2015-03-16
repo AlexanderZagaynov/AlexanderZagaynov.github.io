@@ -6,6 +6,8 @@
     {% include barehead.html %}
     <link rel="stylesheet" href="{{ "/css/about.css" | prepend: site.baseurl }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/trianglify/0.1.5/trianglify.min.js"></script>
   </head>
   <body>
     <nav id="toc">
@@ -15,119 +17,113 @@
       {{ content }}
     </main>
     <script>
-      var slides = document.getElementsByClassName('slide');
-      // scroll to hashed slide on load
-      var initialSlide = location.hash;
-      // animated scroll to slide
-      var showSlide = function(slideId, slideIndex) {
-        var easeInOutQuad = function (t, b, c, d) {
-            t /= d/2;
-            if (t < 1) return c/2*t*t + b;
-            t--;
-            return -c/2 * (t*(t-2) - 1) + b;
-        };
-        var start = window.scrollY;
-            change = window.innerHeight * slideIndex - start,
-            currentTime = 0,
-            increment = 20;
-            duration = 1250;
-        var animateScroll = function() {
-          currentTime += increment;
-          var val = easeInOutQuad(currentTime, start, change, duration);
-          window.scrollTo(window.scrollX, val);
-          if (currentTime < duration) {
-            setTimeout(animateScroll, increment);
-          };
-        };
-        animateScroll();
+      // scroll later to url defined slide on load
+      var initialSlideId = location.hash;
+      // store slides to object
+      var slides = {
+        ids: [],
+        getByIndex: function(slideIndex) { return slides[slides.ids[slideIndex]]; }
       };
-      // Table Of Contents
-      (function() {
-        var linkClick = function(i) {
-          return function(e) {
+      (function(){
+        // create TOC
+        var toc = document.createElement('ul'),
+          tocLinkClick = function(e) {
             e.preventDefault();
-            showSlide(e.target.getAttribute('href'), i);
+            showSlide(e.target.getAttribute('href'));
           };
-        };
-        // TOC creation
-        var toc = document.createElement('ul');
-        for (var slideIndex = 0; slideIndex < slides.length; slideIndex++) {
-          var slideId = slides[slideIndex].id;
+        // background generation
+        var t = new Trianglify(), scrHeight = screen.height, scrWidth = screen.width;
+        // iterate slides
+        var slidesList = document.getElementsByClassName('slide');
+        for (var slideIndex = 0; slideIndex < slidesList.length; slideIndex++) {
+          var slide = slidesList[slideIndex], slideId = slide.id;
+          slides[slideId] = {element: slide}; //, index: slideIndex};
+          slides.ids.push(slideId);
+          // TOC elements
           var tocLink = document.createElement('a');
           tocLink.appendChild(document.createTextNode(slideId));
           tocLink.setAttribute('href', '#' + slideId);
-          tocLink.onclick = function(i) { return linkClick(i); }(slideIndex);
+          tocLink.onclick = tocLinkClick;
           var tocItem = document.createElement('li');
           tocItem.id = 'toc_' + slideId;
           tocItem.appendChild(tocLink);
           toc.appendChild(tocItem);
+          // generate background
+          var pattern = t.generate(scrWidth, scrHeight);
+          slide.setAttribute('style', 'background-image: ' + pattern.dataUrl);
         };
         document.getElementById('toc').appendChild(toc);
       })();
+      // animated scroll to slide
+      var showSlide = function(slideId) {
+        slideId = slideId.substring(1);
+        var start = window.scrollY, change = slides[slideId].fixedPosition - start,
+          currentTime = 0, increment = 20, duration = 1250;
+        var animateScroll = function() {
+          var easeInOutQuad = function (t, b, c, d) {
+            t /= d/2; if (t < 1) return c/2*t*t + b;
+            t--; return -c/2 * (t*(t-2) - 1) + b;
+          };
+          currentTime += increment;
+          window.scrollTo(window.scrollX,
+            easeInOutQuad(currentTime, start, change, duration));
+          if (currentTime < duration) { setTimeout(animateScroll, increment); };
+        };
+        animateScroll();
+      };
+      // calculate positions
+      var calcPositions = function() {
+        if (slides.slideHeight != window.innerHeight) {
+          slides.slideHeight = window.innerHeight;
+          slides.invisiblePosition = -(slides.slideHeight + 100);
+          slides.totalHeight = slides.slideHeight * slides.ids.length;
+          var tocSwitchOffset = slides.slideHeight * 0.2;
+          for (var slideIndex = 0; slideIndex < slides.ids.length; slideIndex++) {
+            var slideObject = slides.getByIndex(slideIndex);
+            slideObject.fixedPosition = slides.slideHeight * slideIndex;
+            slideObject.topPosition = slideObject.fixedPosition - tocSwitchOffset;
+            slideObject.bottomPosition = slideObject.topPosition + slides.slideHeight;
+          };
+          fixPositions();
+        };
+      };
       // slides repositioning
       var fixPositions = function() {
-        var windowHeight = window.innerHeight;
         var currentPosition = window.scrollY;
-        if (currentPosition >= 0 && currentPosition < windowHeight * slides.length) {
-          for (var slideIndex = 0; slideIndex < slides.length; slideIndex++) {
-            var slide = slides[slideIndex];
-            var absolutePosition = windowHeight * slideIndex;
-
-            // // determine proper style -*- v1: flow outside
-            // if (absolutePosition <= currentPosition) {
-            //   var stylePosition = 'absolute';
-            //   var styleTop = absolutePosition + 'px';
-            // } else {
-            //   var stylePosition = 'fixed';
-            //   var styleTop = '0px';
-            // };
-            // // change only when not the same, to avoid many recalcs
-            // if (slide.style.position != stylePosition || slide.style.top != styleTop ) {
-            //   slide.style.position = stylePosition;
-            //   slide.style.top = styleTop;
-            // };
-
-            // determine proper style -*- v2: stack outside
-            if (absolutePosition <= currentPosition) {
-              var styleTop = Math.max((absolutePosition - currentPosition), -(windowHeight + 100)) + 'px';
-            } else {
-              var styleTop = '0px';
+        if (currentPosition >= 0 && currentPosition < slides.totalHeight) {
+          for (var slideIndex = 0; slideIndex < slides.ids.length; slideIndex++) {
+            var slideObject = slides.getByIndex(slideIndex),
+              slide = slideObject.element,
+              slideId = slide.id,
+              slideStyle = slide.style;
+            var styleTop = 0;
+            if (slideObject.fixedPosition <= currentPosition) {
+              styleTop = Math.max(slideObject.fixedPosition - currentPosition,
+                slides.invisiblePosition);
             };
-            // change only when not the same, to avoid many recalcs
-            if (slide.style.top != styleTop ) {
-              slide.style.top = styleTop;
-            };
-
+            styleTop += 'px';
+            // change only when not the same, to avoid dozens recalcs
+            if (slideStyle.top != styleTop ) { slideStyle.top = styleTop; };
             // illuminate TOC item
-            var tocSwitchOffset = windowHeight * 0.2;
-            var topPosition = absolutePosition - tocSwitchOffset;
-            var bottomPosition = absolutePosition + windowHeight - tocSwitchOffset;
-            var tocItem = document.getElementById('toc_' + slide.id);
-            if (currentPosition >= topPosition && currentPosition < bottomPosition) {
+            var tocItem = document.getElementById('toc_' + slideId);
+            if (currentPosition >= slideObject.topPosition && currentPosition < slideObject.bottomPosition) {
               tocItem.classList.add('active');
               // set url
-              history.replaceState('', '', '#' + slide.id);
+              history.replaceState('', '', '#' + slideId);
             } else {
               tocItem.classList.remove('active');
             };
           };
         };
       };
-      // handlers
-      window.onresize = fixPositions;
-      window.onscroll = fixPositions;
       // initially
-      fixPositions();
-      if (initialSlide) {
-        var slide = document.getElementById(initialSlide.substring(1));
-        if (slide) {
-          for (var slideIndex = 0; slideIndex < slides.length; slideIndex++) {
-            if (slides[slideIndex] == slide) {
-              showSlide(initialSlide, slideIndex);
-              break;
-            };
-          };
-        };
+      calcPositions(); // calls fixPositions inside
+      // handlers
+      window.onresize = calcPositions;
+      window.onscroll = fixPositions;
+      // initial scroll
+      if (initialSlideId) {
+        if (document.getElementById(initialSlideId)) { showSlide(initialSlideId); };
       };
     </script>
   </body>
