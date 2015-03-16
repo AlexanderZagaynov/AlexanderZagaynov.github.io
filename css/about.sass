@@ -1,0 +1,56 @@
+---
+---
+
+$slides: title birth childhood scifi credo gagarin alteration computer quest hacker novelty digression maturity burnout odyssey visionary tools kickoff
+
+html, body
+  height: 100%
+  width: 100%
+
+#toc
+  position: fixed
+  z-index: 200
+  background-color: rgba(0, 0, 0, 0.3)
+  border-radius: 15px
+  max-width: 10%
+  top: 2em
+  right: 2em
+  overflow: hidden
+  font-size: 0.9em
+  color: white
+  a
+    color: white
+  ul
+    position: relative
+    list-style-type: none
+    margin: 0px
+    padding: 15px 40px 15px 20px
+    li.active
+      text-shadow: 0px 0px 2px #fff
+      &:after
+        content: "\25C0"
+        text-shadow: none
+        position: absolute
+        right: 1em
+
+.slide
+  height: 100%
+  width: 100%
+  background-color: white
+  box-sizing: border-box
+  padding: 10% 20%
+  margin: 0px
+  box-shadow: 0 15px 15px rgba(0, 0, 0, 0.5)
+  position: fixed
+  top: 0px
+  left: 0px
+
+#slides
+  width: 100%
+  height: 100% * length($slides)
+
+$i: 199
+@each $slide in $slides
+  ##{$slide}
+    z-index: $i
+  $i: $i - 1

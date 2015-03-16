@@ -1,0 +1,134 @@
+---
+---
+<!DOCTYPE html>
+<html>
+  <head>
+    {% include barehead.html %}
+    <link rel="stylesheet" href="{{ "/css/about.css" | prepend: site.baseurl }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  </head>
+  <body>
+    <nav id="toc">
+    </nav>
+    <main id="slides">
+      <h1 class="slide" id="title">{{ page.title }}</h1>
+      {{ content }}
+    </main>
+    <script>
+      var slides = document.getElementsByClassName('slide');
+      // scroll to hashed slide on load
+      var initialSlide = location.hash;
+      // animated scroll to slide
+      var showSlide = function(slideId, slideIndex) {
+        var easeInOutQuad = function (t, b, c, d) {
+            t /= d/2;
+            if (t < 1) return c/2*t*t + b;
+            t--;
+            return -c/2 * (t*(t-2) - 1) + b;
+        };
+        var start = window.scrollY;
+            change = window.innerHeight * slideIndex - start,
+            currentTime = 0,
+            increment = 20;
+            duration = 1250;
+        var animateScroll = function() {
+          currentTime += increment;
+          var val = easeInOutQuad(currentTime, start, change, duration);
+          window.scrollTo(window.scrollX, val);
+          if (currentTime < duration) {
+            setTimeout(animateScroll, increment);
+          };
+        };
+        animateScroll();
+      };
+      // Table Of Contents
+      (function() {
+        var linkClick = function(i) {
+          return function(e) {
+            e.preventDefault();
+            showSlide(e.target.getAttribute('href'), i);
+          };
+        };
+        // TOC creation
+        var toc = document.createElement('ul');
+        for (var slideIndex = 0; slideIndex < slides.length; slideIndex++) {
+          var slideId = slides[slideIndex].id;
+          var tocLink = document.createElement('a');
+          tocLink.appendChild(document.createTextNode(slideId));
+          tocLink.setAttribute('href', '#' + slideId);
+          tocLink.onclick = function(i) { return linkClick(i); }(slideIndex);
+          var tocItem = document.createElement('li');
+          tocItem.id = 'toc_' + slideId;
+          tocItem.appendChild(tocLink);
+          toc.appendChild(tocItem);
+        };
+        document.getElementById('toc').appendChild(toc);
+      })();
+      // slides repositioning
+      var fixPositions = function() {
+        var windowHeight = window.innerHeight;
+        var currentPosition = window.scrollY;
+        if (currentPosition >= 0 && currentPosition < windowHeight * slides.length) {
+          for (var slideIndex = 0; slideIndex < slides.length; slideIndex++) {
+            var slide = slides[slideIndex];
+            var absolutePosition = windowHeight * slideIndex;
+
+            // // determine proper style -*- v1: flow outside
+            // if (absolutePosition <= currentPosition) {
+            //   var stylePosition = 'absolute';
+            //   var styleTop = absolutePosition + 'px';
+            // } else {
+            //   var stylePosition = 'fixed';
+            //   var styleTop = '0px';
+            // };
+            // // change only when not the same, to avoid many recalcs
+            // if (slide.style.position != stylePosition || slide.style.top != styleTop ) {
+            //   slide.style.position = stylePosition;
+            //   slide.style.top = styleTop;
+            // };
+
+            // determine proper style -*- v2: stack outside
+            if (absolutePosition <= currentPosition) {
+              var styleTop = Math.max((absolutePosition - currentPosition), -(windowHeight + 100)) + 'px';
+            } else {
+              var styleTop = '0px';
+            };
+            // change only when not the same, to avoid many recalcs
+            if (slide.style.top != styleTop ) {
+              slide.style.top = styleTop;
+            };
+
+            // illuminate TOC item
+            var tocSwitchOffset = windowHeight * 0.2;
+            var topPosition = absolutePosition - tocSwitchOffset;
+            var bottomPosition = absolutePosition + windowHeight - tocSwitchOffset;
+            var tocItem = document.getElementById('toc_' + slide.id);
+            if (currentPosition >= topPosition && currentPosition < bottomPosition) {
+              tocItem.classList.add('active');
+              // set url
+              history.replaceState('', '', '#' + slide.id);
+            } else {
+              tocItem.classList.remove('active');
+            };
+          };
+        };
+      };
+      // handlers
+      window.onresize = fixPositions;
+      window.onscroll = fixPositions;
+      // initially
+      fixPositions();
+      if (initialSlide) {
+        var slide = document.getElementById(initialSlide.substring(1));
+        if (slide) {
+          for (var slideIndex = 0; slideIndex < slides.length; slideIndex++) {
+            if (slides[slideIndex] == slide) {
+              showSlide(initialSlide, slideIndex);
+              break;
+            };
+          };
+        };
+      };
+    </script>
+  </body>
+</html>
