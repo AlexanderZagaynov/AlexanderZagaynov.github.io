@@ -22,6 +22,7 @@
       // store slides to object
       var slides = {
         ids: [],
+        slideHeight: 0,
         getByIndex: function(slideIndex) { return slides[slides.ids[slideIndex]]; }
       };
       (function(){
@@ -83,6 +84,7 @@
             slideObject.fixedPosition = slides.slideHeight * slideIndex;
             slideObject.topPosition = slideObject.fixedPosition - tocSwitchOffset;
             slideObject.bottomPosition = slideObject.topPosition + slides.slideHeight;
+            slideObject.element.style.height = slides.slideHeight;
           };
           fixPositions();
         };
