@@ -1,15 +1,14 @@
-title: Alexander Zagaynov
+title: Hello, I'm Alexander Zagaynov
 email: zalex80@gmail.com
 description: >
-  My name is Alexander Zagaynov, and I write here about my experience
-  acquirements in the field of web development and tied-up technologies.
-  Please feel free to contact me with questions and offers in any convenient way.
+  Hello, I'm Alexander Zagaynov,
+  and this is my personal blog.
 
-url: http://alexanderzagaynov.com
+url: https://alexanderzagaynov.com
 permalink: :title
 
-twitter_username: yafduch
-github_username:  zalex80
+github_username:  AlexanderZagaynov
+linkedin_username: zalex80
 
 markdown: kramdown
 
@@ -19,11 +18,16 @@ kramdown:
 defaults:
   -
     scope:
-      type: posts
-    values:
-      layout: post
-  -
-    scope:
       type: pages
     values:
       layout: page
+  -
+    scope:
+      type: posts
+    values:
+      layout: post
+  # -
+  #   scope:
+  #     type: archive
+  #   values:
+  #     layout: post

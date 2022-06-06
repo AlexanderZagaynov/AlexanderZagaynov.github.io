@@ -1,0 +1,6 @@
+---
+BUNDLE_PATH: "vendor/bundle"
+BUNDLE_CACHE_PATH: "vendor/cache"
+BUNDLE_CACHE_ALL: "true"
+BUNDLE_CONSOLE: "pry"
+BUNDLE_BIN: "bin"
