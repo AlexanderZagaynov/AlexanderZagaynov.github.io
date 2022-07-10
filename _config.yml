@@ -1,8 +1,10 @@
-title: Hello, I'm Alexander Zagaynov
+title: Alexander Zagaynov's personal site
 email: zalex80@gmail.com
+
 description: >
-  Hello, I'm Alexander Zagaynov,
-  and this is my personal blog.
+  Thoughts, ideas, concepts, and experiments.
+  Software development and the meaning of life.
+  My dear diary.
 
 url: https://alexanderzagaynov.com
 permalink: :title
@@ -26,8 +28,8 @@ defaults:
       type: posts
     values:
       layout: post
-  # -
-  #   scope:
-  #     type: archive
-  #   values:
-  #     layout: post
+  -
+    scope:
+      type: archive
+    values:
+      layout: post
