@@ -1,6 +1,8 @@
 ---
-title:  "Rbenv shared install on Ubuntu 14.04"
-categories: rails deploy
+title:  Rbenv shared install on Ubuntu 14.04
+tags:
+- rails
+- deploy
 ---
 For Ruby versions management I use rbenv.
 
@@ -12,7 +14,7 @@ It can be installed system-wide with apt-get, but I face with stale version in d
 
 That's why I decide to conduct a little research how to make shared (system-wide) installation of rbenv from github.
 
-# Preconditioning
+## Preconditioning
 
 We need `git` for work, and a number of different apps and libraries, [which used by ruby-build](https://github.com/sstephenson/ruby-build/wiki#suggested-build-environment). They all can be installed with a single command:
 
@@ -20,7 +22,7 @@ We need `git` for work, and a number of different apps and libraries, [which use
 sudo apt-get install git autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev
 ```
 
-# Installation
+## Installation
 
 Let's install rbenv in a `/usr/local` directory. Why here? Because this directory 'is widely regarded as a good place in which to keep self-compiled or third-party programs' ([See same named section under this link](http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/usr.html)).
 
@@ -34,7 +36,7 @@ Additionally, let's install ruby-build as a plugin.
 sudo git clone https://github.com/sstephenson/ruby-build.git /usr/local/rbenv/plugins/ruby-build
 ```
 
-# Making-ready
+## Making-ready
 
 We need to add rbenv to a `PATH`, and also two magical lines for rbenv initialization in shell. For not to do it individually for every user, I add them to the end of `/etc/profile`.
 
@@ -66,13 +68,13 @@ sudo mkdir /usr/local/rbenv/versions
 
 Ok, now let's relogin for changes to take effect, or just run `source /etc/profile`. Or, even simplier `. /etc/profile`.
 
-# Usage
+## Usage
 
 Conventional use of rbenv (for example `rbenv install` or `rbenv rehash`) suppose that RBENV_ROOT directory available for user to write. But here it's not. One of the ways to solve that problem - to create a users group, which will do maintenance, with applicable permissions.
 
 I want to go the other way - to use the `sudo` command. Сomplicacy here is that sudo reset's your environment by default for safety reasons. So, we need to run it with `-i` option.
 
-**ruby installation**
+### ruby installation
 
 ```bash
 sudo -i rbenv install 2.2.0
@@ -93,14 +95,14 @@ sudo vim $RBENV_ROOT/versions/2.2.0/etc/gemrc
 
 Go to 'edit' mode in vim with `i` key and add this two lines:
 
-```
+```yaml
 install: --no-document
 update: --no-document
 ```
 
 Save changes and close file `ESC` &rarr; `:wq` &rarr; `Enter`.
 
-**gems installation**
+### gems installation
 
 Now, let's install whatever gem, *for example, rails*:
 
@@ -116,7 +118,7 @@ sudo -i rbenv rehash
 
 ***Congratulations!***
 
-# Caveats
+## Caveats
 
 Commands `bundle install` and `bundle upgrade` works, and must be runned without `sudo`.
 

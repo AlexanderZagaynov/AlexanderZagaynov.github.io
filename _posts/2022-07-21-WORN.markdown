@@ -1,6 +1,6 @@
 ---
 title: WORN
-categories:
+tags:
 - TIL
 ---
 TIL: **WORN** - Written Once, Read Never

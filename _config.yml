@@ -2,17 +2,15 @@ title: Alexander Zagaynov's personal site
 email: zalex80@gmail.com
 
 description: >
+  My dear diary.
   Thoughts, ideas, concepts, and experiments.
   Software development and the meaning of life.
-  My dear diary.
 
 url: https://alexanderzagaynov.com
-permalink: :title
+permalink: /:year/:month/:day/:title
 
 github_username:  AlexanderZagaynov
 linkedin_username: AlexanderZagaynov
-
-markdown: kramdown
 
 kramdown:
   input: GFM
@@ -26,10 +24,5 @@ defaults:
   -
     scope:
       type: posts
-    values:
-      layout: post
-  -
-    scope:
-      type: archive
     values:
       layout: post
